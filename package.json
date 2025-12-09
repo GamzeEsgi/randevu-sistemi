@@ -1,0 +1,15 @@
+{
+  "name": "randevu-sistemi",
+  "version": "1.0.0",
+  "description": "Randevu Sistemi - Full Stack Application",
+  "scripts": {
+    "install-backend": "cd backend && npm install",
+    "start": "cd backend && npm start",
+    "dev": "cd backend && npm run dev",
+    "seed": "cd backend && npm run seed"
+  },
+  "keywords": ["randevu", "appointment", "booking", "nodejs", "express", "mongodb"],
+  "author": "",
+  "license": "ISC"
+}
+
