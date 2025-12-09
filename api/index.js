@@ -19,11 +19,15 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// MongoDB bağlantısı (sadece ilk çağrıda)
+// MongoDB bağlantısı
 let dbConnected = false;
 if (!dbConnected) {
-  connectDB();
-  dbConnected = true;
+  try {
+    connectDB();
+    dbConnected = true;
+  } catch (error) {
+    console.error('MongoDB bağlantı hatası:', error);
+  }
 }
 
 // Health check endpoint
@@ -42,8 +46,8 @@ app.use('/api/categories', require('../backend/routes/categories'));
 app.use('/api/companies', require('../backend/routes/companies'));
 app.use('/api/appointments', require('../backend/routes/appointments'));
 
-// Frontend static dosyalarını serve et
-app.use(express.static(path.join(__dirname, '../frontend')));
+// Frontend static dosyalarını serve et (public klasöründen)
+app.use(express.static(path.join(__dirname, '../public')));
 
 // SPA için tüm route'ları index.html'e yönlendir
 app.get('*', (req, res) => {
@@ -52,7 +56,13 @@ app.get('*', (req, res) => {
     return res.status(404).json({ message: 'API endpoint bulunamadı.' });
   }
   
-  res.sendFile(path.join(__dirname, '../frontend/index.html'));
+  // Static dosyalar için 404 döndür (Vercel bunları handle edecek)
+  const ext = path.extname(req.path);
+  if (ext && ext !== '.html') {
+    return res.status(404).send('File not found');
+  }
+  
+  res.sendFile(path.join(__dirname, '../public/index.html'));
 });
 
 // Vercel serverless function için export
