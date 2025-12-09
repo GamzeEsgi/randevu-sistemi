@@ -1,8 +1,7 @@
-// Vercel serverless function handler
+// Vercel serverless function handler - Sadece API istekleri için
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const path = require('path');
 const connectDB = require('../backend/config/database');
 
 // Ortam değişkenlerini yükle
@@ -46,24 +45,6 @@ app.use('/api/categories', require('../backend/routes/categories'));
 app.use('/api/companies', require('../backend/routes/companies'));
 app.use('/api/appointments', require('../backend/routes/appointments'));
 
-// Frontend static dosyalarını serve et (public klasöründen)
-app.use(express.static(path.join(__dirname, '../public')));
-
-// SPA için tüm route'ları index.html'e yönlendir
-app.get('*', (req, res) => {
-  // API route'larını atla
-  if (req.path.startsWith('/api')) {
-    return res.status(404).json({ message: 'API endpoint bulunamadı.' });
-  }
-  
-  // Static dosyalar için 404 döndür (Vercel bunları handle edecek)
-  const ext = path.extname(req.path);
-  if (ext && ext !== '.html') {
-    return res.status(404).send('File not found');
-  }
-  
-  res.sendFile(path.join(__dirname, '../public/index.html'));
-});
-
 // Vercel serverless function için export
+// Sadece /api/* istekleri buraya gelir
 module.exports = app;
