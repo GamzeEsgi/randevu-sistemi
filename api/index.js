@@ -1,5 +1,7 @@
-// Vercel serverless function için entry point
+// Vercel serverless function handler
 const app = require('../backend/server');
 
-module.exports = app;
-
+// Vercel serverless function için handler
+module.exports = (req, res) => {
+  return app(req, res);
+};
