@@ -16,16 +16,19 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// MongoDB bağlantısı
-let dbConnected = false;
-if (!dbConnected) {
+// MongoDB bağlantısı middleware - Her request'te bağlantıyı kontrol et
+app.use(async (req, res, next) => {
   try {
-    connectDB();
-    dbConnected = true;
+    await connectDB();
+    next();
   } catch (error) {
     console.error('MongoDB bağlantı hatası:', error);
+    res.status(500).json({ 
+      message: 'Veritabanı bağlantı hatası',
+      error: process.env.NODE_ENV === 'production' ? undefined : error.message
+    });
   }
-}
+});
 
 // Health check
 app.get('/health', (req, res) => {
@@ -44,5 +47,4 @@ app.use('/companies', require('../backend/routes/companies'));
 app.use('/appointments', require('../backend/routes/appointments'));
 
 // Vercel serverless function export
-// Vercel otomatik olarak (req, res) => app(req, res) formatına çevirir
 module.exports = app;
