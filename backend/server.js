@@ -39,14 +39,23 @@ app.use('/api/categories', require('./routes/categories'));
 app.use('/api/companies', require('./routes/companies'));
 app.use('/api/appointments', require('./routes/appointments'));
 
-// Frontend static dosyalarını serve et
-app.use(express.static(path.join(__dirname, '../frontend')));
+// Frontend static dosyalarını serve et (CSS, JS, images vb.)
+app.use(express.static(path.join(__dirname, '../frontend'), {
+  maxAge: '1d',
+  etag: true
+}));
 
 // SPA için tüm route'ları index.html'e yönlendir
 app.get('*', (req, res) => {
   // API route'larını atla
   if (req.path.startsWith('/api')) {
     return res.status(404).json({ message: 'API endpoint bulunamadı.' });
+  }
+  
+  // Static dosyalar için 404 döndür (Vercel bunları handle edecek)
+  const ext = path.extname(req.path);
+  if (ext && ext !== '.html') {
+    return res.status(404).send('File not found');
   }
   
   res.sendFile(path.join(__dirname, '../frontend/index.html'));
