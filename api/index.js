@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const path = require('path');
+const connectDB = require('../backend/config/database');
 
 // Ortam değişkenlerini yükle
 dotenv.config();
@@ -18,9 +19,12 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// MongoDB bağlantısı
-const connectDB = require('../backend/config/database');
-connectDB();
+// MongoDB bağlantısı (sadece ilk çağrıda)
+let dbConnected = false;
+if (!dbConnected) {
+  connectDB();
+  dbConnected = true;
+}
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
@@ -38,5 +42,18 @@ app.use('/api/categories', require('../backend/routes/categories'));
 app.use('/api/companies', require('../backend/routes/companies'));
 app.use('/api/appointments', require('../backend/routes/appointments'));
 
-// Vercel serverless function için handler
+// Frontend static dosyalarını serve et
+app.use(express.static(path.join(__dirname, '../frontend')));
+
+// SPA için tüm route'ları index.html'e yönlendir
+app.get('*', (req, res) => {
+  // API route'larını atla
+  if (req.path.startsWith('/api')) {
+    return res.status(404).json({ message: 'API endpoint bulunamadı.' });
+  }
+  
+  res.sendFile(path.join(__dirname, '../frontend/index.html'));
+});
+
+// Vercel serverless function için export
 module.exports = app;
