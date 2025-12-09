@@ -1,4 +1,4 @@
-// Vercel serverless function handler
+// Vercel serverless function - Express app wrapper
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
@@ -44,4 +44,5 @@ app.use('/companies', require('../backend/routes/companies'));
 app.use('/appointments', require('../backend/routes/appointments'));
 
 // Vercel serverless function export
+// Vercel otomatik olarak (req, res) => app(req, res) formatına çevirir
 module.exports = app;
