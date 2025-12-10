@@ -16,6 +16,16 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Vercel'de /api prefix'ini kaldır (rewrite sonrası path hala /api/auth/login şeklinde geliyor)
+app.use((req, res, next) => {
+  // Vercel'de /api/auth/login -> /auth/login'e çevir
+  if (req.url.startsWith('/api/')) {
+    req.url = req.url.replace('/api', '');
+    req.path = req.path.replace('/api', '');
+  }
+  next();
+});
+
 // MongoDB bağlantısı middleware - Her request'te bağlantıyı kontrol et
 app.use(async (req, res, next) => {
   try {
