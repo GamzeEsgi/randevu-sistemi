@@ -1,7 +1,7 @@
 // API Base URL - Production'da otomatik, development'ta local
 const API_BASE_URL = window.location.origin.includes('localhost') 
-    ? '/api' 
-    : window.location.origin + '/api';
+    ? 'http://localhost:5000/api' 
+    : '/api';
 
 // API Helper Functions
 const api = {
