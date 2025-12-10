@@ -8,23 +8,33 @@ if (!cached) {
 }
 
 const connectDB = async () => {
-  // Eğer zaten bağlıysa, mevcut bağlantıyı kullan
+  // Eğer zaten bağlıysa ve bağlantı aktifse, mevcut bağlantıyı kullan
   if (cached.conn) {
-    return cached.conn;
+    // Bağlantının hala aktif olduğunu kontrol et
+    if (mongoose.connection.readyState === 1) {
+      return cached.conn;
+    } else {
+      // Bağlantı kopmuş, temizle
+      cached.conn = null;
+    }
   }
 
   // Eğer bağlantı kuruluyorsa, promise'i bekle
   if (!cached.promise) {
     const opts = {
       bufferCommands: false,
+      serverSelectionTimeoutMS: 5000, // 5 saniye timeout
+      socketTimeoutMS: 45000,
     };
 
     cached.promise = mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/randevu-sistemi', opts).then((mongoose) => {
       console.log('✅ MongoDB bağlantısı başarılı');
+      cached.conn = mongoose;
       return mongoose;
     }).catch((error) => {
       console.error('❌ MongoDB bağlantı hatası:', error.message);
       cached.promise = null; // Hata durumunda promise'i temizle
+      cached.conn = null;
       throw error;
     });
   }
@@ -33,6 +43,7 @@ const connectDB = async () => {
     cached.conn = await cached.promise;
   } catch (e) {
     cached.promise = null;
+    cached.conn = null;
     throw e;
   }
 
